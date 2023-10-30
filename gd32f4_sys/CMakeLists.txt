@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(gd32f4_sys LANGUAGES C ASM)
+project(gd32f4_sys LANGUAGES C CXX ASM)
 
 add_library(${PROJECT_NAME})
 
