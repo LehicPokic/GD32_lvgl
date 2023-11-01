@@ -1,5 +1,8 @@
-#include <Core/include/systick.h>
+
+extern "C" {
 #include <gd32f4xx_rcu.h>
+#include <Core/include/systick.h>
+}
 #include <Core/include/main.h>
 #include <cstdint>
 #include "ST7789S.h"
@@ -9,22 +12,20 @@
 #include "../../lvgl/examples/lv_examples.h"
 
 
-int main(void)
-{
+int main(void) {
     SystemClockInit();
     GpioInit();
     RtcInit();
     EnableIrq();
     ExtMemHwInit();
 
-    //lv_init();
+    lv_init();
 
-    //Display_Init();
+    Display_Init();
 
-    //lv_example_get_started_1();
+    lv_example_get_started_1();
 
-    while (1)
-    {
+    while (1) {
         lv_timer_periodic_handler();
     }
 }
@@ -32,8 +33,8 @@ int main(void)
 
 
 //Init Exmc
-void SdramExmcInit()
-{
+
+void SdramExmcInit() {
     constexpr auto SDRAM_DEVICE = EXMC_SDRAM_DEVICE0;
 
     /* Burst Length */
@@ -43,11 +44,12 @@ void SdramExmcInit()
     /* CAS Latency */
     constexpr std::uint16_t SDRAM_MODEREG_CAS_LATENCY_3 = 0x0030U;
     /* Write Mode */
-    constexpr std::uint16_t SDRAM_MODEREG_WRITEBURST_MODE_SINGLE  = 0x0200U;
+    constexpr std::uint16_t SDRAM_MODEREG_WRITEBURST_MODE_SINGLE = 0x0200U;
     constexpr std::uint16_t SDRAM_MODEREG_OPERATING_MODE_STANDARD = 0x0000U;
-    constexpr std::uint32_t SDRAM_TIMEOUT                         = 0x0000FFFFU;
+    constexpr std::uint32_t SDRAM_TIMEOUT = 0x0000FFFFU;
 
     /* enable EXMC clock */
+
     rcu_periph_clock_enable(RCU_EXMC);
     rcu_periph_clock_enable(RCU_GPIOC);
     rcu_periph_clock_enable(RCU_GPIOD);
@@ -139,30 +141,29 @@ void SdramExmcInit()
 
     /* step 2 : configure SDRAM control registers ---------------------------------*/
     exmc_sdram_parameter_struct sdram_init_struct{};
-    sdram_init_struct.sdram_device         = SDRAM_DEVICE;
+    sdram_init_struct.sdram_device = SDRAM_DEVICE;
     sdram_init_struct.column_address_width = EXMC_SDRAM_COW_ADDRESS_8;
-    sdram_init_struct.row_address_width    = EXMC_SDRAM_ROW_ADDRESS_12;
-    sdram_init_struct.data_width           = EXMC_SDRAM_DATABUS_WIDTH_16B;
+    sdram_init_struct.row_address_width = EXMC_SDRAM_ROW_ADDRESS_12;
+    sdram_init_struct.data_width = EXMC_SDRAM_DATABUS_WIDTH_16B;
     sdram_init_struct.internal_bank_number = EXMC_SDRAM_4_INTER_BANK;
-    sdram_init_struct.cas_latency          = EXMC_CAS_LATENCY_3_SDCLK;
-    sdram_init_struct.write_protection     = DISABLE;
-    sdram_init_struct.sdclock_config       = EXMC_SDCLK_PERIODS_3_HCLK;
-    sdram_init_struct.burst_read_switch    = ENABLE;
-    sdram_init_struct.pipeline_read_delay  = EXMC_PIPELINE_DELAY_2_HCLK;
-    sdram_init_struct.timing               = &sdram_timing_init_struct;
+    sdram_init_struct.cas_latency = EXMC_CAS_LATENCY_3_SDCLK;
+    sdram_init_struct.write_protection = DISABLE;
+    sdram_init_struct.sdclock_config = EXMC_SDCLK_PERIODS_3_HCLK;
+    sdram_init_struct.burst_read_switch = ENABLE;
+    sdram_init_struct.pipeline_read_delay = EXMC_PIPELINE_DELAY_2_HCLK;
+    sdram_init_struct.timing = &sdram_timing_init_struct;
     /* EXMC SDRAM bank initialization */
     exmc_sdram_init(&sdram_init_struct);
 
     /* step 3 : configure CKE high command---------------------------------------*/
     exmc_sdram_command_parameter_struct sdram_command_init_struct{};
-    sdram_command_init_struct.command               = EXMC_SDRAM_CLOCK_ENABLE;
-    sdram_command_init_struct.bank_select           = bank_select;
-    sdram_command_init_struct.auto_refresh_number   = EXMC_SDRAM_AUTO_REFLESH_2_SDCLK;
+    sdram_command_init_struct.command = EXMC_SDRAM_CLOCK_ENABLE;
+    sdram_command_init_struct.bank_select = bank_select;
+    sdram_command_init_struct.auto_refresh_number = EXMC_SDRAM_AUTO_REFLESH_2_SDCLK;
     sdram_command_init_struct.mode_register_content = 0;
     /* wait until the SDRAM controller is ready */
     std::uint32_t timeout = SDRAM_TIMEOUT;
-    while ((exmc_flag_get(SDRAM_DEVICE, EXMC_SDRAM_FLAG_NREADY) != RESET) && (timeout > 0))
-    {
+    while ((exmc_flag_get(SDRAM_DEVICE, EXMC_SDRAM_FLAG_NREADY) != RESET) && (timeout > 0)) {
         timeout--;
     }
     /* send the command */
@@ -172,28 +173,26 @@ void SdramExmcInit()
     SystickDelayMs(10);
 
     /* step 5 : configure precharge all command----------------------------------*/
-    sdram_command_init_struct.command               = EXMC_SDRAM_PRECHARGE_ALL;
-    sdram_command_init_struct.bank_select           = bank_select;
-    sdram_command_init_struct.auto_refresh_number   = EXMC_SDRAM_AUTO_REFLESH_2_SDCLK;
+    sdram_command_init_struct.command = EXMC_SDRAM_PRECHARGE_ALL;
+    sdram_command_init_struct.bank_select = bank_select;
+    sdram_command_init_struct.auto_refresh_number = EXMC_SDRAM_AUTO_REFLESH_2_SDCLK;
     sdram_command_init_struct.mode_register_content = 0;
     /* wait until the SDRAM controller is ready */
     timeout = SDRAM_TIMEOUT;
-    while ((exmc_flag_get(SDRAM_DEVICE, EXMC_SDRAM_FLAG_NREADY) != RESET) && (timeout > 0))
-    {
+    while ((exmc_flag_get(SDRAM_DEVICE, EXMC_SDRAM_FLAG_NREADY) != RESET) && (timeout > 0)) {
         timeout--;
     }
     /* send the command */
     exmc_sdram_command_config(&sdram_command_init_struct);
 
     /* step 6 : configure Auto-Refresh command-----------------------------------*/
-    sdram_command_init_struct.command               = EXMC_SDRAM_AUTO_REFRESH;
-    sdram_command_init_struct.bank_select           = bank_select;
-    sdram_command_init_struct.auto_refresh_number   = EXMC_SDRAM_AUTO_REFLESH_4_SDCLK;
+    sdram_command_init_struct.command = EXMC_SDRAM_AUTO_REFRESH;
+    sdram_command_init_struct.bank_select = bank_select;
+    sdram_command_init_struct.auto_refresh_number = EXMC_SDRAM_AUTO_REFLESH_4_SDCLK;
     sdram_command_init_struct.mode_register_content = 0;
     /* wait until the SDRAM controller is ready */
     timeout = SDRAM_TIMEOUT;
-    while ((exmc_flag_get(SDRAM_DEVICE, EXMC_SDRAM_FLAG_NREADY) != RESET) && (timeout > 0))
-    {
+    while ((exmc_flag_get(SDRAM_DEVICE, EXMC_SDRAM_FLAG_NREADY) != RESET) && (timeout > 0)) {
         timeout--;
     }
     /* send the command */
@@ -201,8 +200,8 @@ void SdramExmcInit()
 
     /* step 7 : configure load mode register command-----------------------------*/
     /* program mode register */
-    sdram_command_init_struct.command             = EXMC_SDRAM_LOAD_MODE_REGISTER;
-    sdram_command_init_struct.bank_select         = bank_select;
+    sdram_command_init_struct.command = EXMC_SDRAM_LOAD_MODE_REGISTER;
+    sdram_command_init_struct.bank_select = bank_select;
     sdram_command_init_struct.auto_refresh_number = EXMC_SDRAM_AUTO_REFLESH_2_SDCLK;
     sdram_command_init_struct.mode_register_content =
             SDRAM_MODEREG_BURST_LENGTH_1 | SDRAM_MODEREG_BURST_TYPE_SEQUENTIAL |
@@ -211,8 +210,7 @@ void SdramExmcInit()
 
     /* wait until the SDRAM controller is ready */
     timeout = SDRAM_TIMEOUT;
-    while ((exmc_flag_get(SDRAM_DEVICE, EXMC_SDRAM_FLAG_NREADY) != RESET) && (timeout > 0))
-    {
+    while ((exmc_flag_get(SDRAM_DEVICE, EXMC_SDRAM_FLAG_NREADY) != RESET) && (timeout > 0)) {
         timeout--;
     }
     /* send the command */
@@ -226,15 +224,13 @@ void SdramExmcInit()
 
     /* wait until the SDRAM controller is ready */
     timeout = SDRAM_TIMEOUT;
-    while ((exmc_flag_get(SDRAM_DEVICE, EXMC_SDRAM_FLAG_NREADY) != RESET) && (timeout > 0))
-    {
+    while ((exmc_flag_get(SDRAM_DEVICE, EXMC_SDRAM_FLAG_NREADY) != RESET) && (timeout > 0)) {
         timeout--;
     }
 }
 
 //Init LcdExmc
-void LcdExmcInit()
-{
+void LcdExmcInit() {
     /* EXMC clock enable */
     rcu_periph_clock_enable(RCU_EXMC);
 
@@ -283,45 +279,43 @@ void LcdExmcInit()
 
     /* configure timing parameter */
     exmc_norsram_timing_parameter_struct nor_timing_init_struct{};
-    nor_timing_init_struct.asyn_access_mode       = EXMC_ACCESS_MODE_A;
-    nor_timing_init_struct.syn_data_latency       = EXMC_DATALAT_2_CLK;
-    nor_timing_init_struct.syn_clk_division       = EXMC_SYN_CLOCK_RATIO_DISABLE;
-    nor_timing_init_struct.bus_latency            = 0;
-    nor_timing_init_struct.asyn_data_setuptime    = 4;
-    nor_timing_init_struct.asyn_address_holdtime  = 0;
+    nor_timing_init_struct.asyn_access_mode = EXMC_ACCESS_MODE_A;
+    nor_timing_init_struct.syn_data_latency = EXMC_DATALAT_2_CLK;
+    nor_timing_init_struct.syn_clk_division = EXMC_SYN_CLOCK_RATIO_DISABLE;
+    nor_timing_init_struct.bus_latency = 0;
+    nor_timing_init_struct.asyn_data_setuptime = 4;
+    nor_timing_init_struct.asyn_address_holdtime = 0;
     nor_timing_init_struct.asyn_address_setuptime = 4;
 
     /* configure EXMC bus parameters */
     exmc_norsram_parameter_struct nor_init_struct;
-    nor_init_struct.norsram_region    = EXMC_BANK0_NORSRAM_REGION0;
-    nor_init_struct.write_mode        = EXMC_ASYN_WRITE;
-    nor_init_struct.extended_mode     = DISABLE;
-    nor_init_struct.asyn_wait         = DISABLE;
-    nor_init_struct.nwait_signal      = DISABLE;
-    nor_init_struct.memory_write      = ENABLE;
-    nor_init_struct.nwait_config      = EXMC_NWAIT_CONFIG_BEFORE;
-    nor_init_struct.wrap_burst_mode   = DISABLE;
-    nor_init_struct.nwait_polarity    = EXMC_NWAIT_POLARITY_LOW;
-    nor_init_struct.burst_mode        = DISABLE;
-    nor_init_struct.databus_width     = EXMC_NOR_DATABUS_WIDTH_16B;
-    nor_init_struct.memory_type       = EXMC_MEMORY_TYPE_PSRAM;
-    nor_init_struct.address_data_mux  = DISABLE;
+    nor_init_struct.norsram_region = EXMC_BANK0_NORSRAM_REGION0;
+    nor_init_struct.write_mode = EXMC_ASYN_WRITE;
+    nor_init_struct.extended_mode = DISABLE;
+    nor_init_struct.asyn_wait = DISABLE;
+    nor_init_struct.nwait_signal = DISABLE;
+    nor_init_struct.memory_write = ENABLE;
+    nor_init_struct.nwait_config = EXMC_NWAIT_CONFIG_BEFORE;
+    nor_init_struct.wrap_burst_mode = DISABLE;
+    nor_init_struct.nwait_polarity = EXMC_NWAIT_POLARITY_LOW;
+    nor_init_struct.burst_mode = DISABLE;
+    nor_init_struct.databus_width = EXMC_NOR_DATABUS_WIDTH_16B;
+    nor_init_struct.memory_type = EXMC_MEMORY_TYPE_PSRAM;
+    nor_init_struct.address_data_mux = DISABLE;
     nor_init_struct.read_write_timing = &nor_timing_init_struct;
-    nor_init_struct.write_timing      = &nor_timing_init_struct;
+    nor_init_struct.write_timing = &nor_timing_init_struct;
     exmc_norsram_init(&nor_init_struct);
 
     /* enable the EXMC bank0 NORSRAM */
     exmc_norsram_enable(EXMC_BANK0_NORSRAM_REGION0);
 }
 
-void ExtMemHwInit()
-{
+void ExtMemHwInit() {
     SdramExmcInit();
     LcdExmcInit();
 }
 
-void SystemClockInit()
-{
+void SystemClockInit() {
 #ifdef NDEBUG
     SCB->VTOR = 0x08010200;
 #endif
@@ -373,8 +367,7 @@ void GpioInit() {
     gpio_mode_set(GPIOB, GPIO_MODE_INPUT, GPIO_PUPD_NONE, GPIO_PIN_13);
 }
 
-void RtcInit()
-{
+void RtcInit() {
     constexpr auto BKP_VALUE = 0x32F1;
 
     /* enable access to RTC registers in Backup domain */
@@ -392,37 +385,34 @@ void RtcInit()
     /* get RTC clock entry selection */
     const auto rtcsrcFlag = GET_BITS(RCU_BDCTL, 8, 9);
     /* check if RTC has aready been configured */
-    if ((BKP_VALUE != RTC_BKP0) || (0x00 == rtcsrcFlag))
-    {
+    if ((BKP_VALUE != RTC_BKP0) || (0x00 == rtcsrcFlag)) {
         /* backup data register value is not correct or not yet programmed
         or RTC clock source is not configured (when the first time the program
         is executed or data in RCU_BDCTL is lost due to Vbat feeding) */
 
         /* setup RTC time value */
         rtc_parameter_struct rtc_initpara{};
-        rtc_initpara.factor_asyn    = 0x7FU;
-        rtc_initpara.factor_syn     = 0xFFU;
-        rtc_initpara.year           = 0x00U;
-        rtc_initpara.day_of_week    = 0x01U;
-        rtc_initpara.month          = 0x01U;
-        rtc_initpara.date           = 0x01U;
+        rtc_initpara.factor_asyn = 0x7FU;
+        rtc_initpara.factor_syn = 0xFFU;
+        rtc_initpara.year = 0x00U;
+        rtc_initpara.day_of_week = 0x01U;
+        rtc_initpara.month = 0x01U;
+        rtc_initpara.date = 0x01U;
         rtc_initpara.display_format = RTC_24HOUR;
-        rtc_initpara.am_pm          = RTC_AM;
-        rtc_initpara.hour           = 0x00U;
-        rtc_initpara.minute         = 0x00U;
-        rtc_initpara.second         = 0x00U;
+        rtc_initpara.am_pm = RTC_AM;
+        rtc_initpara.hour = 0x00U;
+        rtc_initpara.minute = 0x00U;
+        rtc_initpara.second = 0x00U;
         /* RTC current time configuration */
 
     }
 }
 
-void EnableIrq()
-{
+void EnableIrq() {
     __enable_irq();
 }
 
-void SysTick_Handler(void)
-{
+extern "C" void SysTick_Handler(void) {
     SystickUpdate();
     lv_tick_inc(1);
 }

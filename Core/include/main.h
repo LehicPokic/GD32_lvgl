@@ -3,6 +3,8 @@
 
 #endif //STM_LVGL_MAIN_H
 
+
+
 #include <Core/include/systick.h>
 #include <gd32f4xx_rcu.h>
 #include "ST7789S.h"
@@ -12,10 +14,12 @@
 #include "../../lvgl/examples/lv_examples.h"
 
 void SdramExmcInit();
+
+
 void LcdExmcInit();
 void ExtMemHwInit();
 void SystemClockInit();
 void GpioInit();
 void RtcInit();
 void EnableIrq();
-void SysTick_Handler();
+

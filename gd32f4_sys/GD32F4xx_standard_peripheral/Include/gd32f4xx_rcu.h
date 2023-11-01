@@ -1078,6 +1078,7 @@ typedef enum
 /* deinitialize the RCU */
 void rcu_deinit(void);
 /* enable the peripherals clock */
+
 void rcu_periph_clock_enable(rcu_periph_enum periph);
 /* disable the peripherals clock */
 void rcu_periph_clock_disable(rcu_periph_enum periph);

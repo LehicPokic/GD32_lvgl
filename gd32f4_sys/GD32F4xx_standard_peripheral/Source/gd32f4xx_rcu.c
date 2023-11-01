@@ -121,6 +121,7 @@ void rcu_deinit(void)
     \param[out] none
     \retval     none
 */
+
 void rcu_periph_clock_enable(rcu_periph_enum periph)
 {
     RCU_REG_VAL(periph) |= BIT(RCU_BIT_POS(periph));
