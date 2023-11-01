@@ -25,7 +25,7 @@ int main(void) {
     //ST7789S_FillArea(100, 100, 200, 200, 0x03A2);
     Display_Init();
 
-    lv_example_get_started_1();
+    lv_example_get_started_2();
 
     while (1) {
         lv_timer_handler_run_in_period(5);

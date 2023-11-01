@@ -19,6 +19,7 @@
 #ifndef LV_CONF_H
 #define LV_CONF_H
 
+#define LV_USE_DEV_VERSION 1
 
 #include <stdint.h>
 
