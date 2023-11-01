@@ -24,7 +24,6 @@ link_directories(
 
 target_link_libraries(${PROJECT_NAME} lvgl lvgl_examples gd32f4_sys)
 
-
 set(LV_CONF_PATH
         ${CMAKE_SOURCE_DIR}/lv_conf.h
         CACHE STRING "" FORCE)

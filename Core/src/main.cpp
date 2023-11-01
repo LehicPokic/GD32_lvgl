@@ -21,12 +21,14 @@ int main(void) {
 
     lv_init();
 
+    //ST7789S_Init();
+    //ST7789S_FillArea(100, 100, 200, 200, 0x03A2);
     Display_Init();
 
     lv_example_get_started_1();
 
     while (1) {
-        lv_timer_periodic_handler();
+        lv_timer_handler_run_in_period(5);
     }
 }
 
@@ -336,6 +338,8 @@ void GpioInit() {
     rcu_periph_clock_enable(RCU_GPIOB);
     rcu_periph_clock_enable(RCU_GPIOC);
 
+    gpio_mode_set(GPIOA, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO_PIN_1);
+    gpio_bit_set(GPIOA, GPIO_PIN_1);
     // LCD RESET config (PC1)
     gpio_mode_set(GPIOC, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO_PIN_1);
     gpio_output_options_set(GPIOC, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_1);
